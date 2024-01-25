@@ -5,20 +5,28 @@
 -- Query-1 *** List out top 10 authors who have written most books. ***
 
 select * from (
-        select book_author as author, count(book_author) as count, dense_rank() over(order by count(book_author) desc) as rank from book_details group by book_author) 
-where rank <= 10;
+        select book_author as author, count(book_author) as count, dense_rank() over(order by count(book_author) desc) as rank from book_details group by book_author
+        ) where rank <= 10;
 
 
 -- Query-2 *** List out top 10 publishers who published most books. ***
 
 select * from (
-        select publlisher as publisher, count(publlisher) as count, dense_rank() over(order by count(publlisher) desc) as rank from book_details group by publlisher) 
-where rank <= 10;
+        select publlisher as publisher, count(publlisher) as count, dense_rank() over(order by count(publlisher) desc) as rank from book_details group by publlisher
+        ) where rank <= 10;
 
 
 -- Query-3 *** List out top 10 books by average rating. ***
 
+ select * from (
+        select isbn, avg(book_rating) as book_rating, rank() over(order by avg(book_rating) desc) as rank from rating_info group by (isbn) having avg(book_rating) between 0 and 10 
+        ) where rank <= 10;
+
 -- Query-4 *** List out top 10 books by count of ratings. ***
+
+select isbn, count(isbn) from rating_info group by isbn order by count(isbn) desc limit 10;
+
+
 
 -- Query-5 *** List out rating wise books count. (take ceiling of rating) (e.g. 10 - 10012 , 9 - 34344, 8 - 123121). ***
 
