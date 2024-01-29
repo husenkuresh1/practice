@@ -1,0 +1,40 @@
+version: "3"
+
+services:
+  # mysql service
+  db:
+    # image: mysql
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+
+    ports:
+      - 3306:3306
+    volumes:
+      - db_data:/var/lib/mysql
+
+  # php service
+  php:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    env_file:
+      - .env
+    ports:
+      - 8080:80
+      - "443:443"
+    depends_on:
+      - db
+    
+    command: bash -c "php artisan migrate:refresh --seed && supervisord"
+
+
+    restart: always
+
+# volume
+volumes:
+  db_data:
