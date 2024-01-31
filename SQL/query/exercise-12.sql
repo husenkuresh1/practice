@@ -11,8 +11,9 @@ from
 	books_details as b
 inner join rating_info as r on
 	b.isbn = r.isbn
+
 group by
 	b.book_author,
 	b.publisher
 order by
-	avg(r.book_rating) desc ;
+b.book_author;
