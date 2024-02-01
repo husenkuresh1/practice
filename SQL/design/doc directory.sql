@@ -7,6 +7,7 @@ Table Admin {
   admin_id integer [primary key]
   admin_name varchar 
   created_at timestamp
+  updated_at timestamp
 }
 
 -- for maintain all users of system(either team admin or team member) 
@@ -14,6 +15,7 @@ Table User {
   user_id integer [primary key]
   username varchar 
   created_at timestamp
+  updated_at timestamp
 }
 
 -- maintain all the permission list of systems 
@@ -22,6 +24,7 @@ Table Permissions {
   permission_name varchar
   permission_type permission.type
   created_at timestamp
+  updated_at timestamp
 }
 
 -- enum for type of permission
@@ -29,14 +32,16 @@ Enum permission.type {
   general_permission
   collection_permission
   task_permission
-
 }
 
 -- list of all the team with it's admin
 Table Team {
     team_id int [primary key]
     team_name varchar
-    team_admin integer [ref: > User.user_id] 
+    team_admin integer [ref: > User.user_id]
+    is_deleted boolean  
+    created_at timestamp
+    updated_at timestamp
 }
 
 -- list of collection
@@ -62,12 +67,8 @@ Table Files {
   file_url varchar 
   collection_of_file integer [ref: > Collections.collection_id]
   owner integer [ref: > User.user_id]
-}
-
--- permission assign to user
-Table User_Permission_map {
-  user_id integer [ref: > User.user_id]
-  permission_id integer [ref: > Permissions.permission_id]
+  created_at timestamp
+  updated_at timestamp
 }
 
 -- records of request of permission by user
@@ -78,24 +79,33 @@ Table Request_permission {
   request_description text 
   is_approved boolean
   approved_by integer [ref: > Admin.admin_id]
+  created_at timestamp
+  updated_at timestamp
 }
+
 
 -- permission provide to all the team members
 Table Team_Permmision {
   permission_id integer [ref: > Permissions.permission_id]
   team_id integer [ref: > Team.team_id]
+  created_at timestamp
+  updated_at timestamp
 }
 
 -- extra permission provide to team admin
 Table Team_Admin_Permission{
   team_id integer [ref: > Team.team_id]
   permission_id integer [ref: > Permissions.permission_id]
+  created_at timestamp
+  updated_at timestamp
 }
 
 -- team and their members mapping
 Table User_Team_map {
   user_id integer [ref: > User.user_id]
   team_id integer [ref: > Team.team_id]
+  created_at timestamp
+  updated_at timestamp
 }
 
 
