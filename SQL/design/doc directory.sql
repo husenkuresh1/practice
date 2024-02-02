@@ -1,113 +1,143 @@
--- Make sure to attach design image/pdf in the same folder.
--- Write your DDL queries here.
+-- Define ENUM types
 
+CREATE TYPE IF NOT EXISTSpermission_type_enum AS ENUM (
+  'general_permission',
+  'collection_permission',
+  'task_permission'
+);
+
+CREATE TYPE IF NOT EXISTS collection_visibility_enum AS ENUM (
+  'all',
+  'private',
+  'admin'
+);
 
 -- for maintain Administrator of database
-Table Admin {
-  admin_id integer [primary key]
-  admin_name varchar 
-  created_at timestamp
+
+CREATE TABLE IF NOT EXIST admins (
+  admin_id SERIAL PRIMARY KEY,
+  admin_name varchar NOT NULL,
+  created_at timestamp,
   updated_at timestamp
-}
+);
+CREATE SEQUENCE IF NOT EXISTS admin_id_seq;
 
 -- for maintain all users of system(either team admin or team member) 
-Table User {
-  user_id integer [primary key]
-  username varchar 
-  created_at timestamp
+
+CREATE TABLE IF NOT EXIST users (
+  user_id SERIAL PRIMARY KEY,
+  username varchar NOT NULL,
+  user_email varchar unique,
+  user_password varchar NOT NULL,
+  created_at timestamp,
   updated_at timestamp
-}
+)
+CREATE SEQUENCE IF NOT EXISTS user_id_seq;
+CREATE INDEX IF NOT EXISTS username_index ON users (username);
 
 -- maintain all the permission list of systems 
-Table Permissions {
-  permission_id integer [primary key]
-  permission_name varchar
-  permission_type permission.type
-  created_at timestamp
-  updated_at timestamp
-}
 
--- enum for type of permission
-Enum permission.type {
-  general_permission
-  collection_permission
-  task_permission
-}
+CREATE TABLE IF NOT EXIST permissions (
+  permission_id SERIAL PRIMARY KEY,
+  permission_name varchar NOT NULL,
+  permission_type permission_type_enum,
+  created_at timestamp,
+  updated_at timestamp
+);
+CREATE SEQUENCE permission_id_seq;
 
 -- list of all the team with it's admin
-Table Team {
-    team_id int [primary key]
-    team_name varchar
-    team_admin integer [ref: > User.user_id]
-    is_deleted boolean  
-    created_at timestamp
-    updated_at timestamp
-}
+
+CREATE TABLE IF NOT EXIST teams (
+  team_id SERIAL PRIMARY KEY,
+  team_name varchar NOT NULL,
+  team_admin integer,
+  is_deleted boolean DEFAULT false,
+  created_at timestamp,
+  updated_at timestamp,
+  FOREIGN KEY (team_admin) REFERENCES users(user_id)
+);
+CREATE SEQUENCE team_id_seq;
+CREATE INDEX IF NOT EXISTS team_name_index ON teams (team_name);
 
 -- list of collection
-Table Collections{
-  collection_id integer [primary key]
-  collection_name varchar
-  createdBy_team integer [ ref: > Team.team_id]
-  createdBy_user integer [ref: > User.user_id]
-  collection_visibility collections.collection_visibility
-  created_at timestamp
-}
 
--- enum for collection visibility 
-Enum collections.collection_visibility{
-  all
-  private
-  admin
-}
+CREATE TABLE IF NOT EXIST collections (
+  collection_id SERIAL PRIMARY KEY,
+  collection_name varchar NOT NULL,
+  teams_team_id integer,
+  users_user_id integer,
+  collection_visibility collection_visibility_enum,
+  created_at timestamp,
+  FOREIGN KEY (teams_team_id) REFERENCES teams(team_id),
+  FOREIGN KEY (users_user_id) REFERENCES users(user_id)
+);
+CREATE SEQUENCE collection_id_seq;
+CREATE INDEX IF NOT EXISTS collection_name_index ON collections (collection_name);
 
 -- all the files created by team and it's collection
-Table Files {
-  file_id integer [primary key]
-  file_url varchar 
-  collection_of_file integer [ref: > Collections.collection_id]
-  owner integer [ref: > User.user_id]
-  created_at timestamp
-  updated_at timestamp
-}
+
+CREATE TABLE IF NOT EXIST files (
+  file_id SERIAL PRIMARY KEY,
+  file_name varchar NOT NULL,
+  file_url varchar NOT NULL,
+  collections_collection_id integer,
+  users_user_id integer,
+  created_at timestamp,
+  updated_at timestamp,
+  FOREIGN KEY (collections_collection_id) REFERENCES collections(collection_id),
+  FOREIGN KEY (users_user_id) REFERENCES users(user_id)
+);
+CREATE SEQUENCE file_id_seq;
+CREATE INDEX IF NOT EXISTS file_name_index ON files (file_name);
 
 -- records of request of permission by user
-Table Request_permission {
-  request_id integer [primary key]
-  user_id integer [ref: > User.user_id]
-  permission_id integer [ref: > Permissions.permission_id]
-  request_description text 
-  is_approved boolean
-  approved_by integer [ref: > Admin.admin_id]
-  created_at timestamp
-  updated_at timestamp
-}
 
+CREATE TABLE IF NOT EXIST request_permission (
+  request_id SERIAL PRIMARY KEY,
+  users_user_id integer,
+  permissions_permission_id integer,
+  request_description text,
+  is_approved boolean DEFAULT false,
+  approved_by_admin_id integer,
+  created_at timestamp,
+  updated_at timestamp,
+  FOREIGN KEY (users_user_id) REFERENCES users(user_id),
+  FOREIGN KEY (permissions_permission_id) REFERENCES permissions(permission_id),
+  FOREIGN key (approved_by_admin_id) REFERENCES admins(admin_id);
+);
+CREATE SEQUENCE request_id_seq;
 
 -- permission provide to all the team members
-Table Team_Permmision {
-  permission_id integer [ref: > Permissions.permission_id]
-  team_id integer [ref: > Team.team_id]
-  created_at timestamp
-  updated_at timestamp
-}
+
+CREATE TABLE IF NOT EXIST team_permmisions (
+  permissions_permission_id integer,
+  teams_team_id integer,
+  created_at timestamp,
+  updated_at timestamp,
+  FOREIGN KEY (teams_team_id) REFERENCES teams(team_id),
+  FOREIGN KEY (permissions_permission_id) REFERENCES permissions(permission_id)
+);
 
 -- extra permission provide to team admin
-Table Team_Admin_Permission{
-  team_id integer [ref: > Team.team_id]
-  permission_id integer [ref: > Permissions.permission_id]
-  created_at timestamp
-  updated_at timestamp
-}
+
+CREATE TABLE IF NOT EXIST team_admin_permissions (
+  teams_team_id integer,
+  permissions_permission_id integer,
+  created_at timestamp,
+  updated_at timestamp,
+  FOREIGN KEY (teams_team_id) REFERENCES teams(team_id),
+  FOREIGN KEY (permissions_permission_id) REFERENCES permissions(permission_id)
+);
 
 -- team and their members mapping
-Table User_Team_map {
-  user_id integer [ref: > User.user_id]
-  team_id integer [ref: > Team.team_id]
-  created_at timestamp
-  updated_at timestamp
-}
 
-
-
+CREATE TABLE IF NOT EXIST users_teams (
+  users_user_id integer,
+  teams_team_id integer,
+  created_at timestamp,
+  updated_at timestamp,
+  FOREIGN KEY (users_user_id) REFERENCES users(user_id),
+  FOREIGN KEY (teams_team_id) REFERENCES teams(team_id)
+);
 
