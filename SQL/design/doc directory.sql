@@ -20,7 +20,6 @@ CREATE TABLE IF NOT EXISTS admins (
   created_at TIMESTAMP,
   updated_at TIMESTAMP
 );
-CREATE SEQUENCE IF NOT EXISTS admin_id_seq;
 
 -- for maintaining all users of the system (either team admin or team member)
 
@@ -32,8 +31,7 @@ CREATE TABLE IF NOT EXISTS users (
   created_at TIMESTAMP,
   updated_at TIMESTAMP
 );
-CREATE SEQUENCE IF NOT EXISTS user_id_seq;
-CREATE INDEX IF NOT EXISTS username_index ON users (username);
+CREATE INDEX IF NOT EXISTS username_index ON users (username, user_email);
 
 -- maintain all the permission list of the system
 
@@ -44,7 +42,8 @@ CREATE TABLE IF NOT EXISTS permissions (
   created_at TIMESTAMP,
   updated_at TIMESTAMP
 );
-CREATE SEQUENCE IF NOT EXISTS permission_id_seq;
+CREATE INDEX IF NOT EXISTS permission_index ON permissions (permission_name);
+
 
 -- list of all the teams with their admins
 
@@ -57,8 +56,7 @@ CREATE TABLE IF NOT EXISTS teams (
   updated_at TIMESTAMP,
   FOREIGN KEY (team_admin) REFERENCES users(user_id)
 );
-CREATE SEQUENCE IF NOT EXISTS team_id_seq;
-CREATE INDEX IF NOT EXISTS team_name_index ON teams (team_name);
+CREATE INDEX IF NOT EXISTS team_name_index ON teams (team_name, team_admin);
 
 -- list of collections
 
@@ -72,8 +70,7 @@ CREATE TABLE IF NOT EXISTS collections (
   FOREIGN KEY (teams_team_id) REFERENCES teams(team_id),
   FOREIGN KEY (users_user_id) REFERENCES users(user_id)
 );
-CREATE SEQUENCE IF NOT EXISTS collection_id_seq;
-CREATE INDEX IF NOT EXISTS collection_name_index ON collections (collection_name);
+CREATE INDEX IF NOT EXISTS collection_name_index ON collections (collection_name, teams_team_id);
 
 -- all the files created by teams and their collections
 
@@ -88,8 +85,7 @@ CREATE TABLE IF NOT EXISTS files (
   FOREIGN KEY (collections_collection_id) REFERENCES collections(collection_id),
   FOREIGN KEY (users_user_id) REFERENCES users(user_id)
 );
-CREATE SEQUENCE IF NOT EXISTS file_id_seq;
-CREATE INDEX IF NOT EXISTS file_name_index ON files (file_name);
+CREATE INDEX IF NOT EXISTS file_name_index ON files (file_name, collection_id);
 
 -- records of requests for permission by users
 
@@ -106,7 +102,7 @@ CREATE TABLE IF NOT EXISTS request_permission (
   FOREIGN KEY (permissions_permission_id) REFERENCES permissions(permission_id),
   FOREIGN KEY (approved_by_admin_id) REFERENCES admins(admin_id)
 );
-CREATE SEQUENCE IF NOT EXISTS request_id_seq;
+CREATE INDEX IF NOT EXISTS request_index ON request_permission (permissions_permission_id, users_user_id);
 
 -- permissions provided to all team members
 
@@ -115,6 +111,7 @@ CREATE TABLE IF NOT EXISTS team_permissions (
   teams_team_id INTEGER,
   created_at TIMESTAMP,
   updated_at TIMESTAMP,
+  PRIMARY KEY (permissions_permission_id, teams_team_id),
   FOREIGN KEY (teams_team_id) REFERENCES teams(team_id),
   FOREIGN KEY (permissions_permission_id) REFERENCES permissions(permission_id)
 );
@@ -126,6 +123,7 @@ CREATE TABLE IF NOT EXISTS team_admin_permissions (
   permissions_permission_id INTEGER,
   created_at TIMESTAMP,
   updated_at TIMESTAMP,
+  PRIMARY KEY (teams_team_id, permissions_permission_id),
   FOREIGN KEY (teams_team_id) REFERENCES teams(team_id),
   FOREIGN KEY (permissions_permission_id) REFERENCES permissions(permission_id)
 );
@@ -137,6 +135,7 @@ CREATE TABLE IF NOT EXISTS users_teams (
   teams_team_id INTEGER,
   created_at TIMESTAMP,
   updated_at TIMESTAMP,
+  PRIMARY KEY (users_user_id, teams_team_id),
   FOREIGN KEY (users_user_id) REFERENCES users(user_id),
   FOREIGN KEY (teams_team_id) REFERENCES teams(team_id)
 );
