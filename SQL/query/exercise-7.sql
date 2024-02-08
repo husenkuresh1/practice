@@ -5,7 +5,7 @@ select
     publisher as publisher,
     book_author as author,
     count(isbn) as book_count,
-    de() over (partition by publisher order by count(isbn) desc) as rank
+    dense_rank() over (partition by publisher order by count(isbn) desc) as rank
 from
     books_details
 group by
