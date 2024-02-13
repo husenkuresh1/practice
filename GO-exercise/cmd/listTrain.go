@@ -3,6 +3,8 @@ package cmd
 import (
 	"fmt"
 
+	"go-exercise/models"
+
 	"github.com/spf13/cobra"
 )
 
@@ -40,19 +42,13 @@ func listTrain(cmd *cobra.Command, args []string) {
 
 	isTotal, _ := cmd.Flags().GetBool("total")
 	limit, _ := cmd.Flags().GetInt("limit")
-	skip, _ := cmd.Flags().GetInt("skip")
-	order, _ := cmd.Flags().GetString("order")
-	orderBy, _ := cmd.Flags().GetString("order-by")
-	selects, _ := cmd.Flags().GetStringSlice("selects")
-
-	fmt.Println(limit)
-	fmt.Println(skip)
-	fmt.Println(order)
-	fmt.Println(orderBy)
-	fmt.Println(selects)
+	// skip, _ := cmd.Flags().GetInt("skip")
+	// order, _ := cmd.Flags().GetString("order")
+	// orderBy, _ := cmd.Flags().GetString("order-by")
+	// selects, _ := cmd.Flags().GetStringSlice("selects")
 
 	// read csv file using trainInfo() returns slice of trains and error
-	trainSlice, err := trainInfo()
+	trainSlice, err := models.TrainInfo()
 
 	// handling file open or fetching record error
 	if err != nil {
@@ -65,11 +61,15 @@ func listTrain(cmd *cobra.Command, args []string) {
 		fmt.Println(len(trainSlice))
 	}
 
+	
+
 	for index, value := range trainSlice {
 		if limit > 0 && index > limit {
 			break
 		}
-		fmt.Println(value)
+		// fmt.Printf("%T ", value)
+		fmt.Println(value.TrainNo)
+		fmt.Print("")
 	}
 
 }

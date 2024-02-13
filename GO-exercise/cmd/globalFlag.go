@@ -23,14 +23,3 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&orderBy, "order-by", "", "Defines the column on which order is applied")
 	rootCmd.PersistentFlags().StringSliceVar(&selects, "selects", nil, "prints only selected columns out of the whole table")
 }
-
-// func limitDisplay(result) {
-
-// 	result1 := result[0]
-// 	for index, value := range result1 {
-// 		if index > limit {
-// 			break
-// 		}
-// 		fmt.Println(value)
-// 	}
-// }
