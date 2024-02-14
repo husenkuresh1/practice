@@ -23,3 +23,5 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&orderBy, "order-by", "", "Defines the column on which order is applied")
 	rootCmd.PersistentFlags().StringSliceVar(&selects, "selects", nil, "prints only selected columns out of the whole table")
 }
+
+

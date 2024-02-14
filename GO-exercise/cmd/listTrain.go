@@ -42,10 +42,10 @@ func listTrain(cmd *cobra.Command, args []string) {
 
 	isTotal, _ := cmd.Flags().GetBool("total")
 	limit, _ := cmd.Flags().GetInt("limit")
-	// skip, _ := cmd.Flags().GetInt("skip")
-	// order, _ := cmd.Flags().GetString("order")
-	// orderBy, _ := cmd.Flags().GetString("order-by")
-	// selects, _ := cmd.Flags().GetStringSlice("selects")
+	skip, _ := cmd.Flags().GetInt("skip")
+	order, _ := cmd.Flags().GetString("order")
+	orderBy, _ := cmd.Flags().GetString("order-by")
+	selects, _ := cmd.Flags().GetStringSlice("selects")
 
 	// read csv file using trainInfo() returns slice of trains and error
 	trainSlice, err := models.TrainInfo()
@@ -61,15 +61,6 @@ func listTrain(cmd *cobra.Command, args []string) {
 		fmt.Println(len(trainSlice))
 	}
 
-	
-
-	for index, value := range trainSlice {
-		if limit > 0 && index > limit {
-			break
-		}
-		// fmt.Printf("%T ", value)
-		fmt.Println(value.TrainNo)
-		fmt.Print("")
-	}
+	models.PrintTrainStruct(trainSlice, limit, skip+1, order, orderBy, selects)
 
 }

@@ -3,7 +3,6 @@ package models
 // importing packages
 import (
 	"encoding/csv"
-	"fmt"
 	"io"
 	"os"
 
@@ -39,10 +38,17 @@ func TrainInfo() ([]TrainStruct, error) {
 	// initializing file reader
 	reader := csv.NewReader(file)
 
-	userHeader, _ := csvutil.Header(TrainStruct{}, "csv")
+	userHeader, err := csvutil.Header(TrainStruct{}, "csv")
 
-	fmt.Println(userHeader)
-	dec, _ := csvutil.NewDecoder(reader, userHeader...)
+	if err != nil {
+		return nil, err
+	}
+
+	dec, err := csvutil.NewDecoder(reader, userHeader...)
+
+	if err != nil {
+		return nil, err
+	}
 
 	for {
 		var t TrainStruct
@@ -51,8 +57,6 @@ func TrainInfo() ([]TrainStruct, error) {
 		}
 		trains = append(trains, t)
 	}
-
-	// fmt.Println(trains)
 
 	return trains, nil
 }
